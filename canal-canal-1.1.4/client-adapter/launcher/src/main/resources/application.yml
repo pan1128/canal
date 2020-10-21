@@ -1,0 +1,49 @@
+server:
+  port: 8081
+spring:
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+    default-property-inclusion: non_null
+canal.conf:
+  mode: file #tcp # kafka rocketMQ  file
+  canalServerHost: 127.0.0.1:11111
+  fileLocation: D:\mysqlbinlogs
+  driverName:
+  jdbcUrl: jdbc:mysql://192.168.100.105:3306/canal_manager?useUnicode=true&characterEncoding=UTF-8
+  jdbcUsername: root
+  jdbcPassword: root
+#  zookeeperHosts: slave1:2181
+#  mqServers: 127.0.0.1:9092 #or rocketmq
+#  flatMessage: true
+  batchSize: 500
+  syncBatchSize: 1000
+  retries: 0
+  timeout:
+  accessKey:
+  secretKey:
+#  srcDataSources:
+#    defaultDS:
+#      url: jdbc:mysql://127.0.0.1:3306/mytest?useUnicode=true
+#      username: root
+#      password: 121212
+  canalAdapters:
+  - instance: example # canal instance Name or mq topic name
+    groups:
+    - groupId: g1
+      outerAdapters:
+#      - name: logger
+#      - name: rdb
+#        key: mysql1
+#        properties:
+#          jdbc.driverClassName: com.mysql.jdbc.Driver
+#          jdbc.url: jdbc:mysql://192.168.100.131:3306/mytest2?useUnicode=true&useSSL=false
+#          jdbc.username: root
+#          jdbc.password: 5674566yin
+      - name: rdb
+        key: mysql2
+        properties:
+          jdbc.driverClassName: com.mysql.jdbc.Driver
+          jdbc.url: jdbc:mysql://111.231.110.80:3306/mytest2?useUnicode=true&useSSL=false
+          jdbc.username: root
+          jdbc.password: doXbwOrq

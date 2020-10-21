@@ -1,0 +1,31 @@
+server:
+  port: 8090
+spring:
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+
+spring.datasource:
+#  address: 192.168.100.105:3306
+  address: 192.168.100.130:3306
+  database: canal_manager
+  username: root
+  password: 5674566yin
+#  password: root
+  driver-class-name: com.mysql.jdbc.Driver
+  url: jdbc:mysql://${spring.datasource.address}/${spring.datasource.database}?useUnicode=true&characterEncoding=UTF-8&useSSL=false
+  hikari:
+    maximum-pool-size: 30
+    minimum-idle: 1
+
+canal:
+  adminUser: admin
+  adminPasswd: admin
+log:
+  location: D:\runhe\log.log
+rdb:
+  location: D:\ideaproject\canal-canal-1.1.4\canal-canal-1.1.4\client-adapter\launcher\src\main\resources\rdb
+applicationYml:
+  location: D:\ideaproject\canal-canal-1.1.4\canal-canal-1.1.4\client-adapter\launcher\src\main\resources
+binLogFile:
+  location: D:\mysqlbinlogs

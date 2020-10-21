@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <annotationProcessing>
+      <profile name="Maven default annotation processors profile" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <module name="canal.server" />
+        <module name="canal.deployer" />
+        <module name="canal.instance.spring" />
+        <module name="client-adapter.elasticsearch" />
+        <module name="canal.instance.manager" />
+        <module name="client-adapter.hbase" />
+        <module name="client-adapter.common" />
+        <module name="canal.sink" />
+        <module name="canal.parse" />
+        <module name="canal.example" />
+        <module name="canal.common" />
+        <module name="canal.prometheus" />
+        <module name="canal.meta" />
+        <module name="canal.store" />
+        <module name="canal.parse.dbsync" />
+        <module name="client-adapter.logger" />
+        <module name="canal.client" />
+        <module name="canal-admin-server" />
+        <module name="canal.filter" />
+        <module name="client-adapter.rdb" />
+        <module name="canal.protocol" />
+        <module name="canal-admin-ui" />
+        <module name="canal.parse.driver" />
+        <module name="client-adapter.launcher" />
+        <module name="canal.instance.core" />
+      </profile>
+    </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="canal" target="1.8" />
+      <module name="canal-admin" target="1.8" />
+      <module name="canal-admin-server" target="1.8" />
+      <module name="canal-admin-ui" target="1.8" />
+      <module name="canal.client" target="1.8" />
+      <module name="canal.client-adapter" target="1.8" />
+      <module name="canal.common" target="1.8" />
+      <module name="canal.deployer" target="1.8" />
+      <module name="canal.example" target="1.8" />
+      <module name="canal.filter" target="1.8" />
+      <module name="canal.instance" target="1.8" />
+      <module name="canal.instance.core" target="1.8" />
+      <module name="canal.instance.manager" target="1.8" />
+      <module name="canal.instance.spring" target="1.8" />
+      <module name="canal.meta" target="1.8" />
+      <module name="canal.parse" target="1.8" />
+      <module name="canal.parse.dbsync" target="1.8" />
+      <module name="canal.parse.driver" target="1.8" />
+      <module name="canal.prometheus" target="1.8" />
+      <module name="canal.protocol" target="1.8" />
+      <module name="canal.server" target="1.8" />
+      <module name="canal.sink" target="1.8" />
+      <module name="canal.store" target="1.8" />
+      <module name="client-adapter.common" target="1.8" />
+      <module name="client-adapter.elasticsearch" target="1.8" />
+      <module name="client-adapter.hbase" target="1.8" />
+      <module name="client-adapter.launcher" target="1.8" />
+      <module name="client-adapter.logger" target="1.8" />
+      <module name="client-adapter.rdb" target="1.8" />
+    </bytecodeTargetLevel>
+  </component>
+</project>

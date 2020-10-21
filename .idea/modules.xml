@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/canal-canal-1.1.4/canal.iml" filepath="$PROJECT_DIR$/canal-canal-1.1.4/canal.iml" />
+      <module fileurl="file://$PROJECT_DIR$/canal-canal-1.1.4/canal-admin/canal-admin.iml" filepath="$PROJECT_DIR$/canal-canal-1.1.4/canal-admin/canal-admin.iml" />
+      <module fileurl="file://$PROJECT_DIR$/canal-canal-1.1.4/canal-admin/canal-admin-server/canal-admin-server.iml" filepath="$PROJECT_DIR$/canal-canal-1.1.4/canal-admin/canal-admin-server/canal-admin-server.iml" />
+      <module fileurl="file://$PROJECT_DIR$/canal-canal-1.1.4/canal-admin/canal-admin-ui/canal-admin-ui.iml" filepath="$PROJECT_DIR$/canal-canal-1.1.4/canal-admin/canal-admin-ui/canal-admin-ui.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/canal-canal-1.1.4.iml" filepath="$PROJECT_DIR$/.idea/canal-canal-1.1.4.iml" />
+      <module fileurl="file://$PROJECT_DIR$/canal-canal-1.1.4/client/canal.client.iml" filepath="$PROJECT_DIR$/canal-canal-1.1.4/client/canal.client.iml" />
+      <module fileurl="file://$PROJECT_DIR$/canal-canal-1.1.4/client-adapter/canal.client-adapter.iml" filepath="$PROJECT_DIR$/canal-canal-1.1.4/client-adapter/canal.client-adapter.iml" />
+      <module fileurl="file://$PROJECT_DIR$/canal-canal-1.1.4/common/canal.common.iml" filepath="$PROJECT_DIR$/canal-canal-1.1.4/common/canal.common.iml" />
+      <module fileurl="file://$PROJECT_DIR$/canal-canal-1.1.4/deployer/canal.deployer.iml" filepath="$PROJECT_DIR$/canal-canal-1.1.4/deployer/canal.deployer.iml" />
+      <module fileurl="file://$PROJECT_DIR$/canal-canal-1.1.4/example/canal.example.iml" filepath="$PROJECT_DIR$/canal-canal-1.1.4/example/canal.example.iml" />
+      <module fileurl="file://$PROJECT_DIR$/canal-canal-1.1.4/filter/canal.filter.iml" filepath="$PROJECT_DIR$/canal-canal-1.1.4/filter/canal.filter.iml" />
+      <module fileurl="file://$PROJECT_DIR$/canal-canal-1.1.4/instance/canal.instance.iml" filepath="$PROJECT_DIR$/canal-canal-1.1.4/instance/canal.instance.iml" />
+      <module fileurl="file://$PROJECT_DIR$/canal-canal-1.1.4/instance/core/canal.instance.core.iml" filepath="$PROJECT_DIR$/canal-canal-1.1.4/instance/core/canal.instance.core.iml" />
+      <module fileurl="file://$PROJECT_DIR$/canal-canal-1.1.4/instance/manager/canal.instance.manager.iml" filepath="$PROJECT_DIR$/canal-canal-1.1.4/instance/manager/canal.instance.manager.iml" />
+      <module fileurl="file://$PROJECT_DIR$/canal-canal-1.1.4/instance/spring/canal.instance.spring.iml" filepath="$PROJECT_DIR$/canal-canal-1.1.4/instance/spring/canal.instance.spring.iml" />
+      <module fileurl="file://$PROJECT_DIR$/canal-canal-1.1.4/meta/canal.meta.iml" filepath="$PROJECT_DIR$/canal-canal-1.1.4/meta/canal.meta.iml" />
+      <module fileurl="file://$PROJECT_DIR$/canal-canal-1.1.4/parse/canal.parse.iml" filepath="$PROJECT_DIR$/canal-canal-1.1.4/parse/canal.parse.iml" />
+      <module fileurl="file://$PROJECT_DIR$/canal-canal-1.1.4/dbsync/canal.parse.dbsync.iml" filepath="$PROJECT_DIR$/canal-canal-1.1.4/dbsync/canal.parse.dbsync.iml" />
+      <module fileurl="file://$PROJECT_DIR$/canal-canal-1.1.4/driver/canal.parse.driver.iml" filepath="$PROJECT_DIR$/canal-canal-1.1.4/driver/canal.parse.driver.iml" />
+      <module fileurl="file://$PROJECT_DIR$/canal-canal-1.1.4/prometheus/canal.prometheus.iml" filepath="$PROJECT_DIR$/canal-canal-1.1.4/prometheus/canal.prometheus.iml" />
+      <module fileurl="file://$PROJECT_DIR$/canal-canal-1.1.4/protocol/canal.protocol.iml" filepath="$PROJECT_DIR$/canal-canal-1.1.4/protocol/canal.protocol.iml" />
+      <module fileurl="file://$PROJECT_DIR$/canal-canal-1.1.4/server/canal.server.iml" filepath="$PROJECT_DIR$/canal-canal-1.1.4/server/canal.server.iml" />
+      <module fileurl="file://$PROJECT_DIR$/canal-canal-1.1.4/sink/canal.sink.iml" filepath="$PROJECT_DIR$/canal-canal-1.1.4/sink/canal.sink.iml" />
+      <module fileurl="file://$PROJECT_DIR$/canal-canal-1.1.4/store/canal.store.iml" filepath="$PROJECT_DIR$/canal-canal-1.1.4/store/canal.store.iml" />
+      <module fileurl="file://$PROJECT_DIR$/canal-canal-1.1.4/client-adapter/common/client-adapter.common.iml" filepath="$PROJECT_DIR$/canal-canal-1.1.4/client-adapter/common/client-adapter.common.iml" />
+      <module fileurl="file://$PROJECT_DIR$/canal-canal-1.1.4/client-adapter/elasticsearch/client-adapter.elasticsearch.iml" filepath="$PROJECT_DIR$/canal-canal-1.1.4/client-adapter/elasticsearch/client-adapter.elasticsearch.iml" />
+      <module fileurl="file://$PROJECT_DIR$/canal-canal-1.1.4/client-adapter/hbase/client-adapter.hbase.iml" filepath="$PROJECT_DIR$/canal-canal-1.1.4/client-adapter/hbase/client-adapter.hbase.iml" />
+      <module fileurl="file://$PROJECT_DIR$/canal-canal-1.1.4/client-adapter/launcher/client-adapter.launcher.iml" filepath="$PROJECT_DIR$/canal-canal-1.1.4/client-adapter/launcher/client-adapter.launcher.iml" />
+      <module fileurl="file://$PROJECT_DIR$/canal-canal-1.1.4/client-adapter/logger/client-adapter.logger.iml" filepath="$PROJECT_DIR$/canal-canal-1.1.4/client-adapter/logger/client-adapter.logger.iml" />
+      <module fileurl="file://$PROJECT_DIR$/canal-canal-1.1.4/client-adapter/rdb/client-adapter.rdb.iml" filepath="$PROJECT_DIR$/canal-canal-1.1.4/client-adapter/rdb/client-adapter.rdb.iml" />
+    </modules>
+  </component>
+</project>

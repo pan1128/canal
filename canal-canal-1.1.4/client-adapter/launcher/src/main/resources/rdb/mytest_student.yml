@@ -1,0 +1,31 @@
+#dataSourceKey: defaultDS
+#destination: example
+#groupId: g1
+#outerAdapterKey: mysql2
+#concurrent: true
+#dbMapping:
+#  database: mytest2
+#  table: student
+#  targetTable: mytest2.student
+#  targetPk:
+#    id: id
+#  mapAll: true
+##  targetColumns:
+##    id:
+##    name:
+##    role_id:
+##    c_time:
+##    test1:
+#  etlCondition: "where c_time>={}"
+#  commitBatch: 3000 # 批量提交的大小
+
+
+# Mirror schema synchronize config
+dataSourceKey: defaultDS
+destination: example
+groupId: g1
+outerAdapterKey: mysql2
+concurrent: true
+dbMapping:
+  mirrorDb: true
+  database: mytest2 #镜像模式 源数据库和目标数据库的数据库名得完全一致才能匹配上 其中dbMapping.database的值代表源库和目标库的schema名称，即两库的schema要一模一样

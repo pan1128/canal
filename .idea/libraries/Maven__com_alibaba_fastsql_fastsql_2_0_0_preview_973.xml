@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Maven: com.alibaba.fastsql:fastsql:2.0.0_preview_973">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/com/alibaba/fastsql/fastsql/2.0.0_preview_973/fastsql-2.0.0_preview_973.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/com/alibaba/fastsql/fastsql/2.0.0_preview_973/fastsql-2.0.0_preview_973-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/com/alibaba/fastsql/fastsql/2.0.0_preview_973/fastsql-2.0.0_preview_973-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

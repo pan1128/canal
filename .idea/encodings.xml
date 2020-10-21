@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="Encoding" native2AsciiForPropertiesFiles="true" defaultCharsetForPropertiesFiles="UTF-8">
+    <file url="file://$PROJECT_DIR$/canal-canal-1.1.4/canal-admin/canal-admin-server/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/canal-canal-1.1.4/canal-admin/canal-admin-server/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/canal-canal-1.1.4/client-adapter/common/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/canal-canal-1.1.4/client-adapter/elasticsearch/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/canal-canal-1.1.4/client-adapter/elasticsearch/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/canal-canal-1.1.4/client-adapter/hbase/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/canal-canal-1.1.4/client-adapter/hbase/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/canal-canal-1.1.4/client-adapter/launcher/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/canal-canal-1.1.4/client-adapter/launcher/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/canal-canal-1.1.4/client-adapter/logger/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/canal-canal-1.1.4/client-adapter/logger/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/canal-canal-1.1.4/client-adapter/rdb/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/canal-canal-1.1.4/client-adapter/rdb/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/canal-canal-1.1.4/client/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/canal-canal-1.1.4/common/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/canal-canal-1.1.4/dbsync/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/canal-canal-1.1.4/deployer/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/canal-canal-1.1.4/deployer/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/canal-canal-1.1.4/driver/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/canal-canal-1.1.4/example/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/canal-canal-1.1.4/example/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/canal-canal-1.1.4/filter/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/canal-canal-1.1.4/instance/core/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/canal-canal-1.1.4/instance/manager/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/canal-canal-1.1.4/instance/spring/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/canal-canal-1.1.4/meta/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/canal-canal-1.1.4/parse/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/canal-canal-1.1.4/parse/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/canal-canal-1.1.4/prometheus/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/canal-canal-1.1.4/prometheus/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/canal-canal-1.1.4/protocol/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/canal-canal-1.1.4/server/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/canal-canal-1.1.4/sink/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/canal-canal-1.1.4/store/src/main/java" charset="UTF-8" />
+    <file url="PROJECT" charset="UTF-8" />
+  </component>
+</project>
