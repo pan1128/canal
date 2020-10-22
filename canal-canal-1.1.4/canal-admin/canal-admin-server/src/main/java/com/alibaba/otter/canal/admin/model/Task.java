@@ -51,14 +51,25 @@ public class Task extends Model{
     private String fileOverTotal="0";
 
     @Transient
+    private String fileNotOverTatal="0";
+
+    @Transient
     private String fileOverTotalAndTotal;
 
     //进度
     @Transient
     private int progress=0;
 
+    public String getFileNotOverTatal() {
+        return fileNotOverTatal;
+    }
+
+    public void setFileNotOverTatal(String fileNotOverTatal) {
+        this.fileNotOverTatal = fileNotOverTatal;
+    }
+
     public String getFileOverTotalAndTotal() {
-        return fileOverTotal+"/"+fileTotal;
+        return fileOverTotal+"/"+fileNotOverTatal+"/"+fileTotal;
     }
 
 

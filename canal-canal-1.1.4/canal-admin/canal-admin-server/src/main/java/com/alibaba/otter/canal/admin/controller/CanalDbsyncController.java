@@ -233,6 +233,7 @@ public class CanalDbsyncController {
                 int i = over.divide(tatal, 2, RoundingMode.HALF_UP).multiply(new BigDecimal(100)).intValue();
                 item.setProgress(i);
                 item.setFileOverTotal(String.valueOf(runOverNum));
+                item.setFileNotOverTatal(String.valueOf(binLogFiles.length-runOverNum));
             }
         });
 
