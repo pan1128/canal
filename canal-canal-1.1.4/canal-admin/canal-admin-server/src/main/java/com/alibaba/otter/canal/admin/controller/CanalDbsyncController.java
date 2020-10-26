@@ -78,7 +78,7 @@ public class CanalDbsyncController {
 
         task.setModifiedTime(new Date());
         task.setStatus("0");//未启用
-        task.save();
+
 
 
         List<String> list = restTemplate.postForObject(adapterServiceUrl+"/getDataBase?url="+task.getFileUrl()+"&id="+task.getMysqlGroupId(), null, List.class);
@@ -103,6 +103,7 @@ public class CanalDbsyncController {
             canalAdapterConfig.setStatus("0");//0 未删除  1已删除
             canalAdapterConfig.save();
         });
+        task.save();
         /*MysqlGroup mysqlGroup=MysqlGroup.find.byId(task.getMysqlGroupId());
         mysqlGroup.setIsUsed("1");
         OuterAdaptersConfig outerAdaptersConfig=new OuterAdaptersConfig();
@@ -123,8 +124,6 @@ public class CanalDbsyncController {
         canalConfig.setModifiedTime(new Date());
         canalConfig.update("modifiedTime", "content", "contentMd5");
         mysqlGroup.update();*/
-
-
         return BaseModel.getInstance("新增三区任务成功");
     }
 
