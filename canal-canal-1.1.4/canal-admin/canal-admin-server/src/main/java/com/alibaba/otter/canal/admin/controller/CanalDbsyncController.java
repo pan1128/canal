@@ -78,7 +78,7 @@ public class CanalDbsyncController {
 
         task.setModifiedTime(new Date());
         task.setStatus("0");//未启用
-
+        task.save();
 
 
         List<String> list = restTemplate.postForObject(adapterServiceUrl+"/getDataBase?url="+task.getFileUrl()+"&id="+task.getMysqlGroupId(), null, List.class);
@@ -103,7 +103,7 @@ public class CanalDbsyncController {
             canalAdapterConfig.setStatus("0");//0 未删除  1已删除
             canalAdapterConfig.save();
         });
-        task.save();
+
         /*MysqlGroup mysqlGroup=MysqlGroup.find.byId(task.getMysqlGroupId());
         mysqlGroup.setIsUsed("1");
         OuterAdaptersConfig outerAdaptersConfig=new OuterAdaptersConfig();
@@ -153,7 +153,7 @@ public class CanalDbsyncController {
             task.setStartTime(new Date());
 
             List<String> list = restTemplate.postForObject(adapterServiceUrl+"/getDataBase?url="+task.getFileUrl()+"&id="+task.getMysqlGroupId(), null, List.class);
-            List<CanalAdapterConfig> canalAdapterConfigList = CanalAdapterConfig.find.query().findList();
+            /*List<CanalAdapterConfig> canalAdapterConfigList = CanalAdapterConfig.find.query().findList();
             //先清除数据库中的rdb文件
             canalAdapterConfigList.stream().forEach(canalAdapterConfig -> {
                 canalAdapterConfig.delete();
@@ -173,7 +173,7 @@ public class CanalDbsyncController {
                 canalAdapterConfig.setName(rdbConfig.getDbMappingDatabase()+"-"+rdbConfig.getOuterAdapterKey()+".yml");
                 canalAdapterConfig.setStatus("0");//0 未删除  1已删除
                 canalAdapterConfig.save();
-            });
+            });*/
         }else if("off".equals(status)){
             task.setStatus("0");//停止
             task.setStartTime(null);

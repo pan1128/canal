@@ -14,7 +14,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.ObjectInputStream;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -51,12 +50,14 @@ public class CanalAdapterFileTransferWorker extends  AbstractCanalAdapterWorker{
                     }
                     File file = new File(url);
                     File[] binLogFiles = file.listFiles();
-                    Arrays.sort(binLogFiles, new Comparator<File>() {
+                    /*Arrays.sort(binLogFiles, new Comparator<File>() {
                         @Override
                         public int compare(File o1, File o2) {
                             return o1.lastModified()>o2.lastModified()?1:-1;
                         }
-                    });
+                    });*/
+
+                    Arrays.sort(binLogFiles,(o1,o2)-> o1.lastModified()>o2.lastModified()?1:-1);
                     List<List<Message>> messageFileList =Lists.newArrayList();
                     int tatal =0;
                     for (File binLogFile:binLogFiles){
@@ -83,7 +84,7 @@ public class CanalAdapterFileTransferWorker extends  AbstractCanalAdapterWorker{
                     }
                     fileCanalConnector.init();
                     int runndeTatal =0;
-                    for (List<Message> messageList:messageFileList){
+                    /*for (List<Message> messageList:messageFileList){
                         int num = fileCanalConnector.selectAck(messageList.get(0).getFileName());
                         messageList=messageList.subList(num,messageList.size());
                         if (messageList.size()==0) {
@@ -99,9 +100,32 @@ public class CanalAdapterFileTransferWorker extends  AbstractCanalAdapterWorker{
                             //fileCanalConnector.insertHeart(messageList.get(0).getFileName());
                             fileCanalConnector.insertHeartFile(messageList.get(0).getFileName());
                         }
+                    }*/
+                    List<Message> messageTotalList =Lists.newArrayList();
+                    for (List<Message> messageList:messageFileList){
+                        int num = fileCanalConnector.selectAck(messageList.get(0).getFileName());
+                        messageList=messageList.subList(num,messageList.size());
+                        if (messageList.size()==0) {
+                        } else {
+                            runndeTatal=runndeTatal+messageList.size();
+                            long begin = System.currentTimeMillis();
+//                            writeOutByMessageList(messageList);
+                            messageTotalList.addAll(messageList);
+                            CanalFileAdapterPostionDto canalFileAdapterPostionDto=new CanalFileAdapterPostionDto(
+                                    canalDestination,"g1",messageList.get(0).getFileName(),messageList.size()
+                            );
+                            fileCanalConnector.insertAck(canalFileAdapterPostionDto);
+
+                            //fileCanalConnector.insertHeart(messageList.get(0).getFileName());
+                            fileCanalConnector.insertHeartFile(messageList.get(0).getFileName());
+                        }
+
                     }
+                    writeOutByMessageList(messageTotalList);
                     if (runndeTatal!=tatal){//说明binlog回放没有结束
                     }
+
+
                 }
             } catch (Exception e) {
                 logger.error(e.getMessage());

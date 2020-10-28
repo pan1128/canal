@@ -1,10 +1,11 @@
 package com.alibaba.otter.canal.client.adapter.support;
 
-import java.util.*;
-
 import com.alibaba.otter.canal.protocol.CanalEntry;
 import com.alibaba.otter.canal.protocol.FlatMessage;
 import com.alibaba.otter.canal.protocol.Message;
+import org.apache.commons.lang.StringUtils;
+
+import java.util.*;
 
 /**
  * Message对象解析工具类
@@ -46,7 +47,25 @@ public class MessageUtil {
             dml.setEs(entry.getHeader().getExecuteTime());
             dml.setIsDdl(rowChange.getIsDdl());
             dml.setTs(System.currentTimeMillis());
-            dml.setSql(rowChange.getSql());
+            //对于建表语句 如果没有拼接数据库名称 则将其拼接
+            String sql =rowChange.getSql();
+            try {
+                if (StringUtils.isNotBlank(rowChange.getSql())&&"CREATE".equals(dml.getType())){
+                    if (!sql.contains("`"+entry.getHeader().getSchemaName()+"`")){
+                        boolean upFlag =sql.contains("CREATE TABLE");
+                        boolean downFlag =sql.contains("create table");
+                       if (upFlag){
+                           sql="CREATE TABLE "+"`"+entry.getHeader().getSchemaName()+"`."+sql.substring(sql.indexOf("`"));
+                       }
+                       if (downFlag){
+                           sql="create table "+"`"+entry.getHeader().getSchemaName()+"`."+sql.substring(sql.indexOf("`"));
+                       }
+                    }
+                }
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+            dml.setSql(sql);
             dmls.add(dml);
             List<Map<String, Object>> data = new ArrayList<>();
             List<Map<String, Object>> old = new ArrayList<>();
