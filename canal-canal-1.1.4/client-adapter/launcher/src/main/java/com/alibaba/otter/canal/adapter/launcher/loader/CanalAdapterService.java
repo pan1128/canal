@@ -149,4 +149,50 @@ public class CanalAdapterService {
         }
        return mysqlGroup;
     }
+
+    public MysqlGroup getMysqlGroupOne() {
+        {
+            String jdbcUrl = env.getProperty("canal.manager.jdbc.url");
+            String driverName = env.getProperty("canal.manager.jdbc.driverName");
+            String jdbcUsername = env.getProperty("canal.manager.jdbc.username");
+            String jdbcPassword = env.getProperty("canal.manager.jdbc.password");
+            DruidDataSource dataSource = new DruidDataSource();
+            dataSource.setDriverClassName("com.mysql.jdbc.Driver");
+            dataSource.setUrl(jdbcUrl);
+            dataSource.setUsername(jdbcUsername);
+            dataSource.setPassword(jdbcPassword);
+            dataSource.setInitialSize(1);
+            dataSource.setMinIdle(1);
+            dataSource.setMaxActive(1);
+            dataSource.setMaxWait(60000);
+            dataSource.setTimeBetweenEvictionRunsMillis(60000);
+            dataSource.setMinEvictableIdleTimeMillis(300000);
+            try {
+                dataSource.init();
+            } catch (SQLException e) {
+                throw new RuntimeException(e.getMessage(), e);
+            }
+
+            Map<String, ConfigItem> remoteConfigStatus = new HashMap<>();
+            String sql = "select master_url, username, password from mysql_group limit 1";
+            MysqlGroup mysqlGroup=new MysqlGroup();
+            try (Connection conn = dataSource.getConnection();
+                 Statement stmt = conn.createStatement();
+
+                 ResultSet rs = stmt.executeQuery(sql)) {
+                while (rs.next()) {
+                    mysqlGroup.setMasterUrl(rs.getString("master_url"));
+                    mysqlGroup.setUsername(rs.getString("username"));
+                    mysqlGroup.setPassword(rs.getString("password"));
+                }
+            } catch (Exception e) {
+                logger.error(e.getMessage(), e);
+            }
+
+            if (dataSource!=null&&!dataSource.isClosed()){
+                dataSource.close();
+            }
+            return mysqlGroup;
+        }
+    }
 }

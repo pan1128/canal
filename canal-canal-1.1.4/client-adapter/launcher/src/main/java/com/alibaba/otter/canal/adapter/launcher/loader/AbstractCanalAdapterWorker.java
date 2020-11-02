@@ -67,6 +67,8 @@ public abstract class AbstractCanalAdapterWorker {
                     adapters.forEach(adapter -> {
                         long begin = System.currentTimeMillis();
                         List<Dml> dmls = MessageUtil.parse4Dml(canalDestination, groupId, message);
+                        //移除点位之前的dml
+                        dmls=dmls.subList(0,dmls.size());
                         if (dmls != null) {
                             batchSync(dmls, adapter);
 
@@ -74,6 +76,57 @@ public abstract class AbstractCanalAdapterWorker {
                                 logger.debug("{} elapsed time: {}",
                                     adapter.getClass().getName(),
                                     (System.currentTimeMillis() - begin));
+                            }
+                        }
+                    });
+                    return true;
+                } catch (Exception e) {
+                    logger.error(e.getMessage(), e);
+                    return false;
+                }
+            }));
+
+            // 等待所有适配器写入完成
+            // 由于是组间并发操作，所以将阻塞直到耗时最久的工作组操作完成
+            RuntimeException exception = null;
+            for (Future<Boolean> future : futures) {
+                try {
+                    if (!future.get()) {
+                        exception = new RuntimeException("Outer adapter sync failed! ");
+                    }
+                } catch (Exception e) {
+                    exception = new RuntimeException(e);
+                }
+            }
+            if (exception != null) {
+                throw exception;
+            }
+        });
+    }
+
+    protected void writeOut2(final Message message,int num) {
+        List<Future<Boolean>> futures = new ArrayList<>();
+        // 组间适配器并行运行
+        canalOuterAdapters.forEach(outerAdapters -> {
+            final List<OuterAdapter> adapters = outerAdapters;
+            futures.add(groupInnerExecutorService.submit(() -> {
+                try {
+                    // 组内适配器穿行运行，尽量不要配置组内适配器
+                    adapters.forEach(adapter -> {
+                        long begin = System.currentTimeMillis();
+                        List<Dml> dmls = MessageUtil.parse4Dml(canalDestination, groupId, message);
+                        //移除点位之前的dml
+                        if (num!=0){
+                            dmls=dmls.subList(num+1,dmls.size());
+                        }
+
+                        if (dmls != null) {
+                            batchSync(dmls, adapter);
+
+                            if (logger.isDebugEnabled()) {
+                                logger.debug("{} elapsed time: {}",
+                                        adapter.getClass().getName(),
+                                        (System.currentTimeMillis() - begin));
                             }
                         }
                     });

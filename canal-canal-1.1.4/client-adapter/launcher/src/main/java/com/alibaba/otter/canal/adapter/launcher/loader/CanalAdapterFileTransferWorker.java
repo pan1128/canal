@@ -1,18 +1,22 @@
 package com.alibaba.otter.canal.adapter.launcher.loader;
 
 
+import com.alibaba.otter.canal.adapter.launcher.config.SpringContext;
+import com.alibaba.otter.canal.adapter.launcher.monitor.remote.MysqlGroup;
 import com.alibaba.otter.canal.client.adapter.OuterAdapter;
 import com.alibaba.otter.canal.client.adapter.support.CanalClientConfig;
+import com.alibaba.otter.canal.client.adapter.support.Dml;
+import com.alibaba.otter.canal.client.adapter.support.MessageUtil;
 import com.alibaba.otter.canal.client.file.CanalFileAdapterPostionDto;
 import com.alibaba.otter.canal.client.file.FileCanalConnector;
+import com.alibaba.otter.canal.parse.driver.mysql.MysqlConnector;
+import com.alibaba.otter.canal.parse.driver.mysql.MysqlUpdateExecutor;
 import com.alibaba.otter.canal.protocol.Message;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang.StringUtils;
 
-import java.io.EOFException;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.ObjectInputStream;
+import java.io.*;
+import java.net.InetSocketAddress;
 import java.util.Arrays;
 import java.util.List;
 
@@ -58,33 +62,101 @@ public class CanalAdapterFileTransferWorker extends  AbstractCanalAdapterWorker{
                     });*/
 
                     Arrays.sort(binLogFiles,(o1,o2)-> o1.lastModified()>o2.lastModified()?1:-1);
-                    List<List<Message>> messageFileList =Lists.newArrayList();
-                    int tatal =0;
+                    fileCanalConnector.init();
+                    //List<List<Message>> messageFileList =Lists.newArrayList();
                     for (File binLogFile:binLogFiles){
+                        int tatal =0;
                         Message message = null;
                         ObjectInputStream is=null;
                         List<Message> messageListCallAble=Lists.newArrayList();
                         is=new ObjectInputStream(new FileInputStream(binLogFile));
                         try {
+
                             while ((message=(Message)is.readObject())!=null){
                                 message.setFileName(binLogFile.getName());
                                 if (message.getId()!=-1&&message.getEntries().size()!=0){
-                                    messageListCallAble.add(message);
+
+                                    List<Dml> dmls = MessageUtil.parse4Dml(canalDestination, groupId, message);
+
+                                   for (Dml dml:dmls){
+                                       int p=0;
+                                       p++;
+                                       if (dml.getSql()!=null){
+                                           if (StringUtils.isNotBlank(dml.getDatabase())){
+                                               int num = fileCanalConnector.getConfig(dml.getDatabase().replace("`", ""));
+                                               if (num==0){
+                                                   fileCanalConnector.insertConfig(dml.getDatabase().replace("`", ""));
+                                                   fileCanalConnector.insertSqlPosition(message.getFileName(),String.valueOf(message.getId()),p);
+                                                   Thread.sleep(10000);
+                                               }
+                                           }
+
+                                           if (dml.getSql().contains("CREATE DATABASE")||dml.getSql().contains("create database")){
+                                               /*String dataBase = dml.getSql().substring(17);//截取数据库名称
+                                               dataBase=dataBase.substring(0, dataBase.indexOf("`"));
+                                               int num = fileCanalConnector.getConfig(dataBase);*/
+                                               //if (num==0){
+                                                   //执行创表语句 开始 进行数据库创建
+                                                   CanalAdapterService canalAdapterService =(CanalAdapterService)SpringContext.getBean(CanalAdapterService.class);
+                                                   MysqlGroup mysqlGroup=canalAdapterService.getMysqlGroupOne();
+                                                   String address = mysqlGroup.getMasterUrl().substring(0, mysqlGroup.getMasterUrl().indexOf(":"));
+                                                   String port=mysqlGroup.getMasterUrl().substring(mysqlGroup.getMasterUrl().indexOf(":")+1);
+                                                   MysqlConnector connector = new MysqlConnector(new InetSocketAddress(address,Integer.parseInt(port)), mysqlGroup.getUsername(), mysqlGroup.getPassword());
+                                                   try {
+                                                       connector.connect();
+                                                       MysqlUpdateExecutor executor = new MysqlUpdateExecutor(connector);
+                                                       executor.update(dml.getSql());
+                                                       //记录
+                                                       //删除配置文件
+                                                       //fileCanalConnector.insertConfig(dataBase);
+                                                   } catch (IOException e) {
+                                                       logger.error(e.getMessage());
+                                                   } finally {
+                                                       try {
+                                                           connector.disconnect();
+                                                           //Thread.sleep(10000);
+                                                           //return;
+                                                       } catch (Exception e) {
+                                                           logger.error(e.getMessage());
+                                                       }
+                                                   }
+                                                   //执行创表语句 结束
+                                               //}
+
+
+
+
+
+                                           }
+
+
+
+
+                                       }
+                                   }
+
+
+                                   int num =fileCanalConnector.selectSqlPostion( message.getFileName(), String.valueOf(message.getId()));
+                                    writeOut2(message,num);
                                     tatal++;
                                 }
                             }
                         }catch (EOFException e){
-                            //message 读取结束 暂不做处理
+                            //message 读取结束
+                            CanalFileAdapterPostionDto canalFileAdapterPostionDto=new CanalFileAdapterPostionDto(
+                                    canalDestination,"g1",message.getFileName(),tatal
+                            );
+                            fileCanalConnector.insertAck(canalFileAdapterPostionDto);
+                            fileCanalConnector.insertHeartFile(message.getFileName());
                         }finally {
                             if (is!=null){
                                 is.close();
                             }
                         }
-                        messageFileList.add(messageListCallAble);
+                        //messageFileList.add(messageListCallAble);
                     }
-                    fileCanalConnector.init();
-                    int runndeTatal =0;
-                    /*for (List<Message> messageList:messageFileList){
+                    /*int runndeTatal =0;
+                    for (List<Message> messageList:messageFileList){
                         int num = fileCanalConnector.selectAck(messageList.get(0).getFileName());
                         messageList=messageList.subList(num,messageList.size());
                         if (messageList.size()==0) {
@@ -101,7 +173,7 @@ public class CanalAdapterFileTransferWorker extends  AbstractCanalAdapterWorker{
                             fileCanalConnector.insertHeartFile(messageList.get(0).getFileName());
                         }
                     }*/
-                    List<Message> messageTotalList =Lists.newArrayList();
+                    /*List<Message> messageTotalList =Lists.newArrayList();
                     for (List<Message> messageList:messageFileList){
                         int num = fileCanalConnector.selectAck(messageList.get(0).getFileName());
                         messageList=messageList.subList(num,messageList.size());
@@ -120,12 +192,10 @@ public class CanalAdapterFileTransferWorker extends  AbstractCanalAdapterWorker{
                             fileCanalConnector.insertHeartFile(messageList.get(0).getFileName());
                         }
 
-                    }
-                    writeOutByMessageList(messageTotalList);
+                    }*/
+                    /*writeOutByMessageList(messageTotalList);
                     if (runndeTatal!=tatal){//说明binlog回放没有结束
-                    }
-
-
+                    }*/
                 }
             } catch (Exception e) {
                 logger.error(e.getMessage());

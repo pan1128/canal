@@ -25,7 +25,7 @@ public class FileCanalConnector  {
     private Connection connection;
 
     private ReentrantLock lock=new ReentrantLock();
-
+    private static String FILE_CONTENT_SPLIT_MARK="\r\n";
     /**
      * 初始化canal-admin数据源
      * @param driverName
@@ -210,6 +210,101 @@ public class FileCanalConnector  {
             LOGGER.error(e.getMessage(), e);
         }
     }
+    private String generateRdbConfigString(String dataBase) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("dataSourceKey: ").append("defaultDS"+FILE_CONTENT_SPLIT_MARK);
+        //sb.append("destination: ").append("example"+FILE_CONTENT_SPLIT_MARK);
+        sb.append("destination: ").append("example");
+        sb.append("groupId: ").append("g1"+FILE_CONTENT_SPLIT_MARK);
+        sb.append("outerAdapterKey: ").append("mysql"+FILE_CONTENT_SPLIT_MARK);
+        sb.append("concurrent: ").append(Boolean.TRUE+FILE_CONTENT_SPLIT_MARK);
+        sb.append("dbMapping: ").append(FILE_CONTENT_SPLIT_MARK);
+        sb.append("  mirrorDb: ").append(Boolean.TRUE+FILE_CONTENT_SPLIT_MARK);
+        sb.append("  database: ").append(dataBase+FILE_CONTENT_SPLIT_MARK);
+        return sb.toString();
+    }
+
+    public void deleteConfig(){
+        String sql = " delete from canal_adapter_config";
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.executeUpdate();
+            ps.close();
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage(), e);
+        }
+    }
+
+    public int getConfig(String name) {
+        String sql = "SELECT IFNULL(count(*),0) num FROM canal_adapter_config WHERE name= ? ";
+        int num=0;
+        try {
+            Connection conn = getConnection();
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            stmt.setString(1,name);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                num= rs.getInt("num");
+            }
+            stmt.close();
+            rs.close();
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage(), e);
+        }
+        return num;
+    }
+
+    public void insertConfig(String dataBase) {
+        String sql = " insert into canal_adapter_config(category,name,status,content)" +
+                " values (?,?,?,?) ";
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, "rdb");
+            ps.setString(2,dataBase);
+            ps.setString(3,"0");
+            ps.setString(4,generateRdbConfigString(dataBase));
+            ps.executeUpdate();
+            ps.close();
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage(), e);
+        }
+    }
+
+    public int selectSqlPostion(String fileName, String messageUniqeName) {
+        String sql = "SELECT IFNULL(SUM(message_num),0) num FROM canal_file_adapter_postion WHERE file_Name= ? and group_id= ?";
+        int num=0;
+        try {
+            Connection conn = getConnection();
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            stmt.setString(1,fileName);
+            stmt.setString(2,messageUniqeName);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                num= rs.getInt("num");
+            }
+            stmt.close();
+            rs.close();
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage(), e);
+        }
+        return num;
+    }
+
+    public void insertSqlPosition(String fileName, String id, int p) {
+        String sql = " insert into canal_file_adapter_postion(instance,group_id,file_name, message_num)" +
+                " values (?,?,?,?) ";
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, "example");
+            ps.setString(2, id);//利用group id作为message的唯一标识
+            ps.setString(3, fileName);
+            ps.setInt(4, p);
+            ps.executeUpdate();
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage(), e);
+        }
+    }
+
 
     /*public void insertHeart() {
         String sql = " insert into canal_file_adapter_postion(instance,group_id,file_name, message_num)" +

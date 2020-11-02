@@ -285,7 +285,46 @@ public class CommonRest {
                 while ((message=(Message)is.readObject())!=null){
                     message.setFileName(binLogFile.getName());
                     if (message.getId()!=-1&&message.getEntries().size()!=0){
-                        messageListCallAble.add(message);
+                        //messageListCallAble.add(message);
+                        List<Dml> dmlList = new ArrayList<>();
+                        List<Dml> dmls = MessageUtil.parse4Dml("example", "g1", message);
+                        dmlList.addAll(dmls);
+                        dmlList.stream().forEach(item ->{
+                            if (!StringUtils.isEmpty(item.getDatabase())){
+                                //为空说明没有此数据库则进行数据库创建
+                                String dataBase =item.getDatabase().replace("`","");
+                                if (!dataBaseList.contains(dataBase)){
+                                    dataBaseList.add(dataBase);
+                                }
+                            }
+                            if (item.getSql()!=null&&StringUtils.isEmpty(item.getDatabase())&&item.getSql().contains("CREATE DATABASE")){
+                                //进行数据库创建
+                                MysqlGroup mysqlGroup=canalAdapterService.getMysqlGroup(id);
+                                String address = mysqlGroup.getMasterUrl().substring(0, mysqlGroup.getMasterUrl().indexOf(":"));
+                                String port=mysqlGroup.getMasterUrl().substring(mysqlGroup.getMasterUrl().indexOf(":")+1);
+                                MysqlConnector connector = new MysqlConnector(new InetSocketAddress(address,Integer.parseInt(port)), mysqlGroup.getUsername(), mysqlGroup.getPassword());
+                                try {
+                                    connector.connect();
+                                    MysqlUpdateExecutor executor = new MysqlUpdateExecutor(connector);
+                                    executor.update(item.getSql());
+                                } catch (IOException e) {
+                                    logger.error(e.getMessage());
+                                    //Assert.fail(e.getMessage());
+                                } finally {
+                                    try {
+                                        connector.disconnect();
+                                    } catch (IOException e) {
+                                        logger.error(e.getMessage());
+                                        // Assert.fail(e.getMessage());
+                                    }
+                                }
+                                String dataBase = item.getSql().substring(17);//截取数据库名称
+                                dataBase=dataBase.substring(0, dataBase.indexOf("`"));
+                                if (!dataBaseList.contains(dataBase)){
+                                    dataBaseList.add(dataBase);
+                                }
+                            }
+                        });
                     }
                 }
             }catch (EOFException e){
@@ -295,9 +334,8 @@ public class CommonRest {
                     is.close();
                 }
             }
-            //messageFileList.add(messageListCallAble);
         }
-        List<Dml> dmlList = new ArrayList<>();
+        /*List<Dml> dmlList = new ArrayList<>();
         messageListCallAble.forEach(item ->{
             List<Dml> dmls = MessageUtil.parse4Dml("example", "g1", item);
             dmlList.addAll(dmls);
@@ -305,7 +343,7 @@ public class CommonRest {
         dmlList.stream().forEach(item ->{
             if (!StringUtils.isEmpty(item.getDatabase())){
                 //为空说明没有此数据库则进行数据库创建
-                dataBaseList.add(item.getDatabase());
+                dataBaseList.add(item.getDatabase().replace("`",""));
             }
             if (item.getSql()!=null&&StringUtils.isEmpty(item.getDatabase())&&item.getSql().contains("CREATE DATABASE")){
                 //进行数据库创建
@@ -328,11 +366,11 @@ public class CommonRest {
                        // Assert.fail(e.getMessage());
                     }
                 }
-                String dataBase = item.getSql().substring(17);
+                String dataBase = item.getSql().substring(17);//截取数据库名称
                 dataBase=dataBase.substring(0, dataBase.indexOf("`"));
                 dataBaseList.add(dataBase);
             }
-        });
+        });*/
         List<String> collect = dataBaseList.stream().distinct().collect(Collectors.toList());
         return collect;
     }

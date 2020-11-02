@@ -81,7 +81,7 @@ public class CanalDbsyncController {
         task.save();
 
 
-        List<String> list = restTemplate.postForObject(adapterServiceUrl+"/getDataBase?url="+task.getFileUrl()+"&id="+task.getMysqlGroupId(), null, List.class);
+        /*List<String> list = restTemplate.postForObject(adapterServiceUrl+"/getDataBase?url="+task.getFileUrl()+"&id="+task.getMysqlGroupId(), null, List.class);
         List<CanalAdapterConfig> canalAdapterConfigList = CanalAdapterConfig.find.query().findList();
         //先清除数据库中的rdb文件
         canalAdapterConfigList.stream().forEach(canalAdapterConfig -> {
@@ -102,7 +102,7 @@ public class CanalDbsyncController {
             canalAdapterConfig.setName(rdbConfig.getDbMappingDatabase()+"-"+rdbConfig.getOuterAdapterKey()+".yml");
             canalAdapterConfig.setStatus("0");//0 未删除  1已删除
             canalAdapterConfig.save();
-        });
+        });*/
 
         /*MysqlGroup mysqlGroup=MysqlGroup.find.byId(task.getMysqlGroupId());
         mysqlGroup.setIsUsed("1");
@@ -152,8 +152,8 @@ public class CanalDbsyncController {
             task.setStatus("1");//启动
             task.setStartTime(new Date());
 
-            List<String> list = restTemplate.postForObject(adapterServiceUrl+"/getDataBase?url="+task.getFileUrl()+"&id="+task.getMysqlGroupId(), null, List.class);
-            /*List<CanalAdapterConfig> canalAdapterConfigList = CanalAdapterConfig.find.query().findList();
+            /*List<String> list = restTemplate.postForObject(adapterServiceUrl+"/getDataBase?url="+task.getFileUrl()+"&id="+task.getMysqlGroupId(), null, List.class);
+            List<CanalAdapterConfig> canalAdapterConfigList = CanalAdapterConfig.find.query().findList();
             //先清除数据库中的rdb文件
             canalAdapterConfigList.stream().forEach(canalAdapterConfig -> {
                 canalAdapterConfig.delete();
@@ -178,7 +178,7 @@ public class CanalDbsyncController {
             task.setStatus("0");//停止
             task.setStartTime(null);
         }
-        Thread.sleep(1000);
+        Thread.sleep(500);
         task.update("status","modifiedTime","startTime");
         return BaseModel.getInstance("任务启动或停止成功");
     }
@@ -220,13 +220,15 @@ public class CanalDbsyncController {
                 for (File logFile : binLogFiles) {
                     List<CanalHeart> list = CanalHeart.find.query().where().eq("fileName", logFile.getName()).
                             orderBy().desc("lastRunTime").findList();
+
                     if (list!=null&&list.size()>0){
-                        CanalHeart canalHeart = list.get(0);
+                        /*CanalHeart canalHeart = list.get(0);
                         int c=(int)(System.currentTimeMillis()-canalHeart.getLastRunTime().getTime())/1000;
-                        if (c>2){//两秒没心跳 默认 文件回放结束
-                            runOverNum++;
-                        }
+                        if (c>2){//两秒没心跳 默认 文件回放结束*/
+                        runOverNum++;
+                        //}
                     }
+
                 }
                 BigDecimal over = new BigDecimal(runOverNum);
                 int i = over.divide(tatal, 2, RoundingMode.HALF_UP).multiply(new BigDecimal(100)).intValue();
