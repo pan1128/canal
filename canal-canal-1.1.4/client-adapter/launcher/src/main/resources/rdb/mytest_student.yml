@@ -24,7 +24,7 @@
 dataSourceKey: defaultDS
 destination: example
 groupId: g1
-outerAdapterKey: mysql2
+outerAdapterKey: mysql
 concurrent: true
 dbMapping:
   mirrorDb: true

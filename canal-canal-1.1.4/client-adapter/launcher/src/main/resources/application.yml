@@ -10,9 +10,11 @@ canal.conf:
   canalServerHost: 127.0.0.1:11111
   fileLocation: D:\mysqlbinlogs
   driverName:
-  jdbcUrl: jdbc:mysql://192.168.100.105:3306/canal_manager?useUnicode=true&characterEncoding=UTF-8
+  jdbcUrl: jdbc:mysql://192.168.100.130:3306/canal_manager?useUnicode=true&characterEncoding=UTF-8
+#  jdbcUrl: jdbc:mysql://192.168.100.105:3306/canal_manager?useUnicode=true&characterEncoding=UTF-8
   jdbcUsername: root
-  jdbcPassword: root
+#  jdbcPassword: root
+  jdbcPassword: 5674566yin
 #  zookeeperHosts: slave1:2181
 #  mqServers: 127.0.0.1:9092 #or rocketmq
 #  flatMessage: true
