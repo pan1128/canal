@@ -8,7 +8,9 @@ import org.slf4j.LoggerFactory;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
@@ -210,11 +212,13 @@ public class FileCanalConnector  {
             LOGGER.error(e.getMessage(), e);
         }
     }
+
+
     private String generateRdbConfigString(String dataBase) {
         StringBuilder sb = new StringBuilder();
         sb.append("dataSourceKey: ").append("defaultDS"+FILE_CONTENT_SPLIT_MARK);
         //sb.append("destination: ").append("example"+FILE_CONTENT_SPLIT_MARK);
-        sb.append("destination: ").append("example");
+        sb.append("destination: ").append("example"+FILE_CONTENT_SPLIT_MARK);
         sb.append("groupId: ").append("g1"+FILE_CONTENT_SPLIT_MARK);
         sb.append("outerAdapterKey: ").append("mysql"+FILE_CONTENT_SPLIT_MARK);
         sb.append("concurrent: ").append(Boolean.TRUE+FILE_CONTENT_SPLIT_MARK);
@@ -241,7 +245,7 @@ public class FileCanalConnector  {
         try {
             Connection conn = getConnection();
             PreparedStatement stmt = conn.prepareStatement(sql);
-            stmt.setString(1,name);
+            stmt.setString(1,name+".yml");
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
                 num= rs.getInt("num");
@@ -260,7 +264,7 @@ public class FileCanalConnector  {
         try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, "rdb");
-            ps.setString(2,dataBase);
+            ps.setString(2,dataBase+".yml");
             ps.setString(3,"0");
             ps.setString(4,generateRdbConfigString(dataBase));
             ps.executeUpdate();
@@ -271,7 +275,8 @@ public class FileCanalConnector  {
     }
 
     public int selectSqlPostion(String fileName, String messageUniqeName) {
-        String sql = "SELECT IFNULL(SUM(message_num),0) num FROM canal_file_adapter_postion WHERE file_Name= ? and group_id= ?";
+        //String sql = "SELECT IFNULL(SUM(message_num),0) num FROM canal_file_adapter_postion WHERE file_Name= ? and group_id= ?";
+        String sql = "SELECT IFNULL(count(*),0) num FROM canal_file_adapter_postion WHERE file_Name= ? and group_id= ?";
         int num=0;
         try {
             Connection conn = getConnection();
@@ -290,7 +295,32 @@ public class FileCanalConnector  {
         return num;
     }
 
+    public int  isExist(String fileName, String id){
+        //String sql = "SELECT IFNULL(SUM(message_num),0) num FROM canal_file_adapter_postion WHERE file_Name= ? and group_id= ?";
+        String sql = "SELECT IFNULL(count(*),0) num FROM canal_file_adapter_postion WHERE file_Name= ? and group_id= ?";
+        int num=0;
+        try {
+            Connection conn = getConnection();
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            stmt.setString(1,fileName);
+            stmt.setString(2,id);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                num= rs.getInt("num");
+            }
+            stmt.close();
+            rs.close();
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage(), e);
+        }
+        return num;
+
+    }
     public void insertSqlPosition(String fileName, String id, int p) {
+        int num=isExist(fileName,id);
+        if (num>0){
+            return;
+        }
         String sql = " insert into canal_file_adapter_postion(instance,group_id,file_name, message_num)" +
                 " values (?,?,?,?) ";
         try (Connection conn = getConnection();
@@ -304,6 +334,29 @@ public class FileCanalConnector  {
             LOGGER.error(e.getMessage(), e);
         }
     }
+
+    public List<String> getHeartFileName() {
+        String sql = "SELECT DISTINCT file_name  FROM canal_heart ";
+        List<String> fileNameList = new ArrayList<>();
+        //String fileName = fileNameList.stream().collect(Collectors.joining(", "));
+        String fileName ="";
+        try {
+            Connection conn = getConnection();
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                fileName= rs.getString("file_name");
+                fileNameList.add(fileName);
+            }
+            stmt.close();
+            rs.close();
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage(), e);
+        }
+        return fileNameList;
+    }
+
+
 
 
     /*public void insertHeart() {

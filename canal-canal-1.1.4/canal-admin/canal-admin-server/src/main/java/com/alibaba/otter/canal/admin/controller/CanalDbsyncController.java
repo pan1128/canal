@@ -221,7 +221,7 @@ public class CanalDbsyncController {
                     List<CanalHeart> list = CanalHeart.find.query().where().eq("fileName", logFile.getName()).
                             orderBy().desc("lastRunTime").findList();
 
-                    if (list!=null&&list.size()>0){
+                    if (list!=null&&list.size()>0){//读取message结束 会插入 数据 有数据说明回放完成
                         /*CanalHeart canalHeart = list.get(0);
                         int c=(int)(System.currentTimeMillis()-canalHeart.getLastRunTime().getTime())/1000;
                         if (c>2){//两秒没心跳 默认 文件回放结束*/
@@ -318,11 +318,11 @@ public class CanalDbsyncController {
                         orderBy().desc("lastRunTime").findList();
                 if (list!=null&&list.size()>0){
                     CanalHeart canalHeart = list.get(0);
-                    int c=(int)(System.currentTimeMillis()-canalHeart.getLastRunTime().getTime())/1000;
-                    if (c>2){//两秒没心跳 默认 文件回放结束
+                    /*int c=(int)(System.currentTimeMillis()-canalHeart.getLastRunTime().getTime())/1000;
+                    if (c>2){//两秒没心跳 默认 文件回放结束*/
                         logFile.setStatus("1");//回放结束
                         logFile.setEndTime(canalHeart.getLastRunTime());
-                    }
+                    /*}*/
                 }
 
             }catch (Exception e){

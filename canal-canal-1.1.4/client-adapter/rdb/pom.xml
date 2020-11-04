@@ -18,6 +18,17 @@
             <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>
+        <!--<dependency>
+            <groupId>com.alibaba.otter</groupId>
+            <artifactId>client-adapter.launcher</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>-->
+        <dependency>
+            <groupId>com.alibaba.otter</groupId>
+            <artifactId>canal.parse.driver</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>

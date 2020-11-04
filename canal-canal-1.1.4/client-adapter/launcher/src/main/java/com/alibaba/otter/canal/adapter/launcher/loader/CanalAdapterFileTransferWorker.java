@@ -7,7 +7,6 @@ import com.alibaba.otter.canal.client.adapter.OuterAdapter;
 import com.alibaba.otter.canal.client.adapter.support.CanalClientConfig;
 import com.alibaba.otter.canal.client.adapter.support.Dml;
 import com.alibaba.otter.canal.client.adapter.support.MessageUtil;
-import com.alibaba.otter.canal.client.file.CanalFileAdapterPostionDto;
 import com.alibaba.otter.canal.client.file.FileCanalConnector;
 import com.alibaba.otter.canal.parse.driver.mysql.MysqlConnector;
 import com.alibaba.otter.canal.parse.driver.mysql.MysqlUpdateExecutor;
@@ -19,6 +18,7 @@ import java.io.*;
 import java.net.InetSocketAddress;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * file对应的client适配器工作线程
@@ -54,17 +54,12 @@ public class CanalAdapterFileTransferWorker extends  AbstractCanalAdapterWorker{
                     }
                     File file = new File(url);
                     File[] binLogFiles = file.listFiles();
-                    /*Arrays.sort(binLogFiles, new Comparator<File>() {
-                        @Override
-                        public int compare(File o1, File o2) {
-                            return o1.lastModified()>o2.lastModified()?1:-1;
-                        }
-                    });*/
-
                     Arrays.sort(binLogFiles,(o1,o2)-> o1.lastModified()>o2.lastModified()?1:-1);
                     fileCanalConnector.init();
-                    //List<List<Message>> messageFileList =Lists.newArrayList();
-                    for (File binLogFile:binLogFiles){
+                    List<File> files = Arrays.asList(binLogFiles);
+                    List<String> fileNameList =fileCanalConnector.getHeartFileName();
+                    files=files.stream().filter(s->!fileNameList.contains(s.getName())).collect(Collectors.toList());
+                    for (File binLogFile:files){
                         int tatal =0;
                         Message message = null;
                         ObjectInputStream is=null;
@@ -75,9 +70,7 @@ public class CanalAdapterFileTransferWorker extends  AbstractCanalAdapterWorker{
                             while ((message=(Message)is.readObject())!=null){
                                 message.setFileName(binLogFile.getName());
                                 if (message.getId()!=-1&&message.getEntries().size()!=0){
-
                                     List<Dml> dmls = MessageUtil.parse4Dml(canalDestination, groupId, message);
-
                                    for (Dml dml:dmls){
                                        int p=0;
                                        p++;
@@ -86,8 +79,8 @@ public class CanalAdapterFileTransferWorker extends  AbstractCanalAdapterWorker{
                                                int num = fileCanalConnector.getConfig(dml.getDatabase().replace("`", ""));
                                                if (num==0){
                                                    fileCanalConnector.insertConfig(dml.getDatabase().replace("`", ""));
-                                                   fileCanalConnector.insertSqlPosition(message.getFileName(),String.valueOf(message.getId()),p);
-                                                   Thread.sleep(10000);
+                                                   //fileCanalConnector.insertSqlPosition(message.getFileName(),String.valueOf(message.getId()),p);
+                                                   Thread.sleep(15000);
                                                }
                                            }
 
@@ -96,57 +89,59 @@ public class CanalAdapterFileTransferWorker extends  AbstractCanalAdapterWorker{
                                                dataBase=dataBase.substring(0, dataBase.indexOf("`"));
                                                int num = fileCanalConnector.getConfig(dataBase);*/
                                                //if (num==0){
-                                                   //执行创表语句 开始 进行数据库创建
-                                                   CanalAdapterService canalAdapterService =(CanalAdapterService)SpringContext.getBean(CanalAdapterService.class);
-                                                   MysqlGroup mysqlGroup=canalAdapterService.getMysqlGroupOne();
-                                                   String address = mysqlGroup.getMasterUrl().substring(0, mysqlGroup.getMasterUrl().indexOf(":"));
-                                                   String port=mysqlGroup.getMasterUrl().substring(mysqlGroup.getMasterUrl().indexOf(":")+1);
-                                                   MysqlConnector connector = new MysqlConnector(new InetSocketAddress(address,Integer.parseInt(port)), mysqlGroup.getUsername(), mysqlGroup.getPassword());
+
+                                               //执行创库语句 开始 进行数据库创建
+                                               CanalAdapterService canalAdapterService =(CanalAdapterService)SpringContext.getBean(CanalAdapterService.class);
+                                               MysqlGroup mysqlGroup=canalAdapterService.getMysqlGroupOne();
+                                               String address = mysqlGroup.getMasterUrl().substring(0, mysqlGroup.getMasterUrl().indexOf(":"));
+                                               String port=mysqlGroup.getMasterUrl().substring(mysqlGroup.getMasterUrl().indexOf(":")+1);
+                                               MysqlConnector connector = new MysqlConnector(new InetSocketAddress(address,Integer.parseInt(port)), mysqlGroup.getUsername(), mysqlGroup.getPassword());
+                                               try {
+                                                   connector.connect();
+                                                   MysqlUpdateExecutor executor = new MysqlUpdateExecutor(connector);
+                                                   executor.update(dml.getSql());
+                                                   //记录
+                                                   //删除配置文件
+                                                   //fileCanalConnector.insertConfig(dataBase);
+                                               } catch (IOException e) {
+                                                   logger.error(e.getMessage());
+                                               } finally {
                                                    try {
-                                                       connector.connect();
-                                                       MysqlUpdateExecutor executor = new MysqlUpdateExecutor(connector);
-                                                       executor.update(dml.getSql());
-                                                       //记录
-                                                       //删除配置文件
-                                                       //fileCanalConnector.insertConfig(dataBase);
-                                                   } catch (IOException e) {
+                                                       connector.disconnect();
+                                                       //Thread.sleep(10000);
+                                                       //return;
+                                                   } catch (Exception e) {
                                                        logger.error(e.getMessage());
-                                                   } finally {
-                                                       try {
-                                                           connector.disconnect();
-                                                           //Thread.sleep(10000);
-                                                           //return;
-                                                       } catch (Exception e) {
-                                                           logger.error(e.getMessage());
-                                                       }
                                                    }
-                                                   //执行创表语句 结束
+                                               }
+                                               //执行创表语句 结束
+
                                                //}
 
-
-
-
-
                                            }
-
-
-
-
                                        }
                                    }
-
-
-                                   int num =fileCanalConnector.selectSqlPostion( message.getFileName(), String.valueOf(message.getId()));
-                                    writeOut2(message,num);
+                                   /*int num =fileCanalConnector.selectSqlPostion( message.getFileName(), String.valueOf(message.getId()));
+                                    writeOut2(message,num);*/
+                                    /*if (num>0){
+                                        continue;//能根据message_id查到说明该message已经回放 则跳过
+                                    }*/
+                                    int num =fileCanalConnector.selectSqlPostion( message.getFileName(), String.valueOf(message.getId()));
+                                    if (num>0){
+                                        continue;
+                                    }
+                                    writeOut(message);
+                                    fileCanalConnector.insertSqlPosition(message.getFileName(),String.valueOf(message.getId()),0);
                                     tatal++;
                                 }
                             }
                         }catch (EOFException e){
                             //message 读取结束
-                            CanalFileAdapterPostionDto canalFileAdapterPostionDto=new CanalFileAdapterPostionDto(
+                            /*CanalFileAdapterPostionDto canalFileAdapterPostionDto=new CanalFileAdapterPostionDto(
                                     canalDestination,"g1",message.getFileName(),tatal
                             );
-                            fileCanalConnector.insertAck(canalFileAdapterPostionDto);
+
+                            fileCanalConnector.insertAck(canalFileAdapterPostionDto);*/
                             fileCanalConnector.insertHeartFile(message.getFileName());
                         }finally {
                             if (is!=null){

@@ -68,7 +68,7 @@ public abstract class AbstractCanalAdapterWorker {
                         long begin = System.currentTimeMillis();
                         List<Dml> dmls = MessageUtil.parse4Dml(canalDestination, groupId, message);
                         //移除点位之前的dml
-                        dmls=dmls.subList(0,dmls.size());
+                        //dmls=dmls.subList(0,dmls.size());
                         if (dmls != null) {
                             batchSync(dmls, adapter);
 
