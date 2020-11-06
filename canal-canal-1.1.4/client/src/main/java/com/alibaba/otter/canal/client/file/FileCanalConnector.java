@@ -217,7 +217,6 @@ public class FileCanalConnector  {
     private String generateRdbConfigString(String dataBase) {
         StringBuilder sb = new StringBuilder();
         sb.append("dataSourceKey: ").append("defaultDS"+FILE_CONTENT_SPLIT_MARK);
-        //sb.append("destination: ").append("example"+FILE_CONTENT_SPLIT_MARK);
         sb.append("destination: ").append("example"+FILE_CONTENT_SPLIT_MARK);
         sb.append("groupId: ").append("g1"+FILE_CONTENT_SPLIT_MARK);
         sb.append("outerAdapterKey: ").append("mysql"+FILE_CONTENT_SPLIT_MARK);
@@ -354,6 +353,18 @@ public class FileCanalConnector  {
             LOGGER.error(e.getMessage(), e);
         }
         return fileNameList;
+    }
+
+    public int updateTaskStatus() {
+        String sql = " UPDATE task SET status=0  ";
+        int result =0;
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            result = ps.executeUpdate();
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage(), e);
+        }
+        return result;
     }
 
 

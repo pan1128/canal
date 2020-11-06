@@ -45,20 +45,20 @@ public class CanalAdapterFileTransferWorker extends  AbstractCanalAdapterWorker{
     @Override
     protected void process() {
         while (running){
+            long start=System.currentTimeMillis();
             try {
                 syncSwitch.get(canalDestination);
-                while (running){
+                my:while (running){
                     String url= fileCanalConnector.getTask();
                     if (StringUtils.isBlank(url)){
-                        continue;
+                        continue my;
                     }
                     File file = new File(url);
                     File[] binLogFiles = file.listFiles();
-                    Arrays.sort(binLogFiles,(o1,o2)-> o1.lastModified()>o2.lastModified()?1:-1);
                     fileCanalConnector.init();
                     List<File> files = Arrays.asList(binLogFiles);
                     List<String> fileNameList =fileCanalConnector.getHeartFileName();
-                    files=files.stream().filter(s->!fileNameList.contains(s.getName())).collect(Collectors.toList());
+                    files=files.stream().filter(s->!fileNameList.contains(s.getName())).sorted((o1,o2)-> o1.lastModified()>o2.lastModified()?1:-1).collect(Collectors.toList());
                     for (File binLogFile:files){
                         int tatal =0;
                         Message message = null;
@@ -66,7 +66,6 @@ public class CanalAdapterFileTransferWorker extends  AbstractCanalAdapterWorker{
                         List<Message> messageListCallAble=Lists.newArrayList();
                         is=new ObjectInputStream(new FileInputStream(binLogFile));
                         try {
-
                             while ((message=(Message)is.readObject())!=null){
                                 message.setFileName(binLogFile.getName());
                                 if (message.getId()!=-1&&message.getEntries().size()!=0){
@@ -79,17 +78,10 @@ public class CanalAdapterFileTransferWorker extends  AbstractCanalAdapterWorker{
                                                int num = fileCanalConnector.getConfig(dml.getDatabase().replace("`", ""));
                                                if (num==0){
                                                    fileCanalConnector.insertConfig(dml.getDatabase().replace("`", ""));
-                                                   //fileCanalConnector.insertSqlPosition(message.getFileName(),String.valueOf(message.getId()),p);
                                                    Thread.sleep(15000);
                                                }
                                            }
-
-                                           if (dml.getSql().contains("CREATE DATABASE")||dml.getSql().contains("create database")){
-                                               /*String dataBase = dml.getSql().substring(17);//截取数据库名称
-                                               dataBase=dataBase.substring(0, dataBase.indexOf("`"));
-                                               int num = fileCanalConnector.getConfig(dataBase);*/
-                                               //if (num==0){
-
+                                           if (dml.getSql().toUpperCase().contains("CREATE DATABASE")){//||dml.getSql().contains("create database")
                                                //执行创库语句 开始 进行数据库创建
                                                CanalAdapterService canalAdapterService =(CanalAdapterService)SpringContext.getBean(CanalAdapterService.class);
                                                MysqlGroup mysqlGroup=canalAdapterService.getMysqlGroupOne();
@@ -100,102 +92,56 @@ public class CanalAdapterFileTransferWorker extends  AbstractCanalAdapterWorker{
                                                    connector.connect();
                                                    MysqlUpdateExecutor executor = new MysqlUpdateExecutor(connector);
                                                    executor.update(dml.getSql());
-                                                   //记录
-                                                   //删除配置文件
-                                                   //fileCanalConnector.insertConfig(dataBase);
-                                               } catch (IOException e) {
+                                               } catch (Exception e) {
+                                                   //回放数据库如果挂掉 则更新task任务状态 停止回放
+                                                   fileCanalConnector.updateTaskStatus();
                                                    logger.error(e.getMessage());
+                                                   continue my;
                                                } finally {
                                                    try {
                                                        connector.disconnect();
-                                                       //Thread.sleep(10000);
-                                                       //return;
                                                    } catch (Exception e) {
                                                        logger.error(e.getMessage());
                                                    }
                                                }
-                                               //执行创表语句 结束
-
-                                               //}
-
                                            }
                                        }
                                    }
-                                   /*int num =fileCanalConnector.selectSqlPostion( message.getFileName(), String.valueOf(message.getId()));
-                                    writeOut2(message,num);*/
-                                    /*if (num>0){
-                                        continue;//能根据message_id查到说明该message已经回放 则跳过
-                                    }*/
                                     int num =fileCanalConnector.selectSqlPostion( message.getFileName(), String.valueOf(message.getId()));
                                     if (num>0){
                                         continue;
                                     }
-                                    writeOut(message);
+                                    try {
+                                        writeOut(message);
+                                    }catch (Exception e){
+                                        //如果线程池内的线程出现异常 则更新task任务状态 停止回放
+                                        fileCanalConnector.updateTaskStatus();
+                                        logger.error(e.getMessage());
+                                        continue my;
+                                    }
                                     fileCanalConnector.insertSqlPosition(message.getFileName(),String.valueOf(message.getId()),0);
                                     tatal++;
                                 }
                             }
                         }catch (EOFException e){
-                            //message 读取结束
-                            /*CanalFileAdapterPostionDto canalFileAdapterPostionDto=new CanalFileAdapterPostionDto(
-                                    canalDestination,"g1",message.getFileName(),tatal
-                            );
-
-                            fileCanalConnector.insertAck(canalFileAdapterPostionDto);*/
                             fileCanalConnector.insertHeartFile(message.getFileName());
+                            //每一个binlog文件回放结束后查看任务最新状态 如果已经停止 则跳到my标识位处
+                            String url1= fileCanalConnector.getTask();
+                            if (StringUtils.isBlank(url1)){
+                                continue my;
+                            }
                         }finally {
                             if (is!=null){
                                 is.close();
                             }
                         }
-                        //messageFileList.add(messageListCallAble);
                     }
-                    /*int runndeTatal =0;
-                    for (List<Message> messageList:messageFileList){
-                        int num = fileCanalConnector.selectAck(messageList.get(0).getFileName());
-                        messageList=messageList.subList(num,messageList.size());
-                        if (messageList.size()==0) {
-                        } else {
-                            runndeTatal=runndeTatal+messageList.size();
-                            long begin = System.currentTimeMillis();
-                            writeOutByMessageList(messageList);
-                            CanalFileAdapterPostionDto canalFileAdapterPostionDto=new CanalFileAdapterPostionDto(
-                                    canalDestination,"g1",messageList.get(0).getFileName(),messageList.size()
-                            );
-                            fileCanalConnector.insertAck(canalFileAdapterPostionDto);
-
-                            //fileCanalConnector.insertHeart(messageList.get(0).getFileName());
-                            fileCanalConnector.insertHeartFile(messageList.get(0).getFileName());
-                        }
-                    }*/
-                    /*List<Message> messageTotalList =Lists.newArrayList();
-                    for (List<Message> messageList:messageFileList){
-                        int num = fileCanalConnector.selectAck(messageList.get(0).getFileName());
-                        messageList=messageList.subList(num,messageList.size());
-                        if (messageList.size()==0) {
-                        } else {
-                            runndeTatal=runndeTatal+messageList.size();
-                            long begin = System.currentTimeMillis();
-//                            writeOutByMessageList(messageList);
-                            messageTotalList.addAll(messageList);
-                            CanalFileAdapterPostionDto canalFileAdapterPostionDto=new CanalFileAdapterPostionDto(
-                                    canalDestination,"g1",messageList.get(0).getFileName(),messageList.size()
-                            );
-                            fileCanalConnector.insertAck(canalFileAdapterPostionDto);
-
-                            //fileCanalConnector.insertHeart(messageList.get(0).getFileName());
-                            fileCanalConnector.insertHeartFile(messageList.get(0).getFileName());
-                        }
-
-                    }*/
-                    /*writeOutByMessageList(messageTotalList);
-                    if (runndeTatal!=tatal){//说明binlog回放没有结束
-                    }*/
                 }
             } catch (Exception e) {
                 logger.error(e.getMessage());
                 e.printStackTrace();
             }finally {
+                logger.info("此次binlog文件扫描回放结束,耗时:{}",System.currentTimeMillis()-start);
             }
         }
     }

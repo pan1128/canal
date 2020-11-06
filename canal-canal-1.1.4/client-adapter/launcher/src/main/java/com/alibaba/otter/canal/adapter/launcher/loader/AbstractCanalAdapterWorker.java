@@ -77,11 +77,15 @@ public abstract class AbstractCanalAdapterWorker {
                                     adapter.getClass().getName(),
                                     (System.currentTimeMillis() - begin));
                             }
+
                         }
                     });
                     return true;
                 } catch (Exception e) {
                     logger.error(e.getMessage(), e);
+
+
+                    //groupInnerExecutorService.shutdownNow();
                     return false;
                 }
             }));
