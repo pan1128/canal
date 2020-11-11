@@ -179,6 +179,13 @@ public class FileCanalConnector  {
         System.out.println(new Date(System.currentTimeMillis()));
     }
 
+    /**
+     * 查询三区任务
+     * @Param: []
+     * @Return: java.lang.String
+     * @Author: Rivan
+     * @Date: 2020/11/11 10:33
+     */
     public String getTask() {
         String sql = "SELECT file_url FROM task where status ='1' limit 1 ";
         String url=null;
@@ -198,6 +205,13 @@ public class FileCanalConnector  {
 
     }
 
+    /**
+     * binlog文件回放完，插入一条记录
+     * @Param: [fileName]
+     * @Return: void
+     * @Author: Rivan
+     * @Date: 2020/11/11 10:33
+     */
     public void insertHeartFile(String fileName) {
         String sql = " insert into canal_heart(file_name,last_run_time)" +
                 " values (?,?) ";
@@ -214,6 +228,13 @@ public class FileCanalConnector  {
     }
 
 
+    /**
+     * 构造rdb配置文件内容
+     * @Param: [dataBase]
+     * @Return: java.lang.String
+     * @Author: Rivan
+     * @Date: 2020/11/11 10:34
+     */
     private String generateRdbConfigString(String dataBase) {
         StringBuilder sb = new StringBuilder();
         sb.append("dataSourceKey: ").append("defaultDS"+FILE_CONTENT_SPLIT_MARK);
@@ -238,6 +259,13 @@ public class FileCanalConnector  {
         }
     }
 
+    /**
+     * 根据数据库名称查询是否已经存在配置文件
+     * @Param: [name]
+     * @Return: int
+     * @Author: Rivan
+     * @Date: 2020/11/11 10:34
+     */
     public int getConfig(String name) {
         String sql = "SELECT IFNULL(count(*),0) num FROM canal_adapter_config WHERE name= ? ";
         int num=0;
@@ -257,6 +285,13 @@ public class FileCanalConnector  {
         return num;
     }
 
+    /**
+     * 插入rdb数据库配置文件
+     * @Param: [dataBase]
+     * @Return: void
+     * @Author: Rivan
+     * @Date: 2020/11/11 10:35
+     */
     public void insertConfig(String dataBase) {
         String sql = " insert into canal_adapter_config(category,name,status,content)" +
                 " values (?,?,?,?) ";
@@ -273,6 +308,12 @@ public class FileCanalConnector  {
         }
     }
 
+    /**
+     * 查询message是否已经回放
+     * @param fileName
+     * @param messageUniqeName
+     * @return
+     */
     public int selectSqlPostion(String fileName, String messageUniqeName) {
         //String sql = "SELECT IFNULL(SUM(message_num),0) num FROM canal_file_adapter_postion WHERE file_Name= ? and group_id= ?";
         String sql = "SELECT IFNULL(count(*),0) num FROM canal_file_adapter_postion WHERE file_Name= ? and group_id= ?";
@@ -294,6 +335,12 @@ public class FileCanalConnector  {
         return num;
     }
 
+    /**
+     * 查询message是否已经回放
+     * @param fileName
+     * @param id
+     * @return
+     */
     public int  isExist(String fileName, String id){
         //String sql = "SELECT IFNULL(SUM(message_num),0) num FROM canal_file_adapter_postion WHERE file_Name= ? and group_id= ?";
         String sql = "SELECT IFNULL(count(*),0) num FROM canal_file_adapter_postion WHERE file_Name= ? and group_id= ?";
@@ -315,6 +362,14 @@ public class FileCanalConnector  {
         return num;
 
     }
+
+    /**
+     * 回放完一条message，记录
+     * @Param: [fileName, id, p]
+     * @Return: void
+     * @Author: Rivan
+     * @Date: 2020/11/11 10:39
+     */
     public void insertSqlPosition(String fileName, String id, int p) {
         int num=isExist(fileName,id);
         if (num>0){
@@ -334,6 +389,13 @@ public class FileCanalConnector  {
         }
     }
 
+    /**
+     * 查询已经回放结束的binlog文件名称list
+     * @Param: []
+     * @Return: java.util.List<java.lang.String>
+     * @Author: Rivan
+     * @Date: 2020/11/11 10:38
+     */
     public List<String> getHeartFileName() {
         String sql = "SELECT DISTINCT file_name  FROM canal_heart ";
         List<String> fileNameList = new ArrayList<>();
@@ -355,6 +417,13 @@ public class FileCanalConnector  {
         return fileNameList;
     }
 
+    /**
+     * 更新三区任务状态
+     * @Param: []
+     * @Return: int
+     * @Author: Rivan
+     * @Date: 2020/11/11 10:37
+     */
     public int updateTaskStatus() {
         String sql = " UPDATE task SET status=0  ";
         int result =0;
@@ -367,6 +436,13 @@ public class FileCanalConnector  {
         return result;
     }
 
+    /**
+     * 删除记录的message回放信息
+     * @Param: [fileName]
+     * @Return: void
+     * @Author: Rivan
+     * @Date: 2020/11/11 10:37
+     */
     public void deleteCanalFileAdapterPostion(String fileName) {
 
         String sql="delete from canal_file_adapter_postion where file_name= ? ";

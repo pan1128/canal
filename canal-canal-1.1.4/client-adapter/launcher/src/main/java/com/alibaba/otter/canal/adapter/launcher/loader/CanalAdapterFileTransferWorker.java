@@ -49,6 +49,7 @@ public class CanalAdapterFileTransferWorker extends  AbstractCanalAdapterWorker{
             try {
                 syncSwitch.get(canalDestination);
                 my:while (running){
+                    //获取数据库中的任务状态
                     String url= fileCanalConnector.getTask();
                     if (StringUtils.isBlank(url)){
                         continue my;
@@ -57,8 +58,11 @@ public class CanalAdapterFileTransferWorker extends  AbstractCanalAdapterWorker{
                     File[] binLogFiles = file.listFiles();
                     fileCanalConnector.init();
                     List<File> files = Arrays.asList(binLogFiles);
+                    //获取已经回放过的binlog文件名称list 用于剔除
                     List<String> fileNameList =fileCanalConnector.getHeartFileName();
                     files=files.stream().filter(s->!fileNameList.contains(s.getName())).sorted((o1,o2)-> o1.lastModified()>o2.lastModified()?1:-1).collect(Collectors.toList());
+
+                    //循环文件，开始回放
                     for (File binLogFile:files){
                         int tatal =0;
                         Message message = null;
@@ -75,12 +79,15 @@ public class CanalAdapterFileTransferWorker extends  AbstractCanalAdapterWorker{
                                        p++;
                                        if (dml.getSql()!=null){
                                            if (StringUtils.isNotBlank(dml.getDatabase())){
+                                               //查询 rdb下有无该数据库配置文件
                                                int num = fileCanalConnector.getConfig(dml.getDatabase().replace("`", ""));
                                                if (num==0){
+                                                   //如果没有 则向数据库中插入该回放数据库的配置文件 等待adapter 5s生成
                                                    fileCanalConnector.insertConfig(dml.getDatabase().replace("`", ""));
                                                    Thread.sleep(15000);
                                                }
                                            }
+                                           //如果是创建数据库语句
                                            if (dml.getSql().toUpperCase().contains("CREATE DATABASE")){//||dml.getSql().contains("create database")
                                                //执行创库语句 开始 进行数据库创建
                                                CanalAdapterService canalAdapterService =(CanalAdapterService)SpringContext.getBean(CanalAdapterService.class);
@@ -107,6 +114,7 @@ public class CanalAdapterFileTransferWorker extends  AbstractCanalAdapterWorker{
                                            }
                                        }
                                    }
+                                   //查询该message有没有被回放过 num>0说明已经回放过
                                     int num =fileCanalConnector.selectSqlPostion( message.getFileName(), String.valueOf(message.getId()));
                                     if (num>0){
                                         continue;
@@ -119,13 +127,15 @@ public class CanalAdapterFileTransferWorker extends  AbstractCanalAdapterWorker{
                                         logger.error(e.getMessage());
                                         continue my;
                                     }
+                                    //message回放完 数据库记录下
                                     fileCanalConnector.insertSqlPosition(message.getFileName(),String.valueOf(message.getId()),0);
                                     tatal++;
                                 }
                             }
                         }catch (EOFException e){
+                            //一个binlog文件回放完 数据库记录下
                             fileCanalConnector.insertHeartFile(message.getFileName());
-                            //每一个binlog执行完，删除canal_file_adapter_postion对应的数据
+                            //每一个binlog文件执行完，删除canal_file_adapter_postion记录message对应的数据
                             fileCanalConnector.deleteCanalFileAdapterPostion(message.getFileName());
                             //每一个binlog文件回放结束后查看任务最新状态 如果已经停止 则跳到my标识位处
                             String url1= fileCanalConnector.getTask();
