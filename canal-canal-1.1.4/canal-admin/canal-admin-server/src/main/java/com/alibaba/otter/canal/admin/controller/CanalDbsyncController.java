@@ -200,6 +200,7 @@ public class CanalDbsyncController {
     @ApiOperation("获取任务列表")
     @GetMapping("/getTaskList")
     public BaseModel<Pager<Task>> getTaskList(Pager<Task> pager,Task task){
+        LOGGER.info("查询task表开始，time:{}",System.currentTimeMillis());
         Query<Task> query = Task.find.query();
         if (StringUtils.isNotEmpty(task.getName())) {
             query.where().like("name", "%" + task.getName() + "%");
@@ -217,18 +218,16 @@ public class CanalDbsyncController {
                 BigDecimal tatal = new BigDecimal(item.getFileTotal());
                 //获取已完成的binlog文件数
                 int runOverNum =0;
+                List<String> fileNameList =Lists.newArrayList();
                 for (File logFile : binLogFiles) {
-                    List<CanalHeart> list = CanalHeart.find.query().where().eq("fileName", logFile.getName()).
-                            orderBy().desc("lastRunTime").findList();
-
-                    if (list!=null&&list.size()>0){//读取message结束 会插入 数据 有数据说明回放完成
-                        /*CanalHeart canalHeart = list.get(0);
-                        int c=(int)(System.currentTimeMillis()-canalHeart.getLastRunTime().getTime())/1000;
-                        if (c>2){//两秒没心跳 默认 文件回放结束*/
-                        runOverNum++;
-                        //}
+                    fileNameList.add(logFile.getName());
+                }
+                if (fileNameList.size()>0){
+                    List<CanalHeart> list = CanalHeart.find.query().where().in("fileName", fileNameList).findList();
+                    //读取message结束 会插入 数据 有数据说明回放完成
+                    if (list!=null&&list.size()>0){
+                        runOverNum=list.size();
                     }
-
                 }
                 BigDecimal over = new BigDecimal(runOverNum);
                 int i = over.divide(tatal, 2, RoundingMode.HALF_UP).multiply(new BigDecimal(100)).intValue();
@@ -237,7 +236,6 @@ public class CanalDbsyncController {
                 item.setFileNotOverTatal(String.valueOf(binLogFiles.length-runOverNum));
             }
         });
-
         Query<Task> queryCnt = query.copy();
         int count = queryCnt.findCount();
         pager.setCount((long) count);
@@ -310,21 +308,13 @@ public class CanalDbsyncController {
             logFile.setUpdateTime(new Date(binLogFile.lastModified()));
             logFile.setStatus("0");//回放未结束
             try{
-                /*String flag = restTemplate.postForObject(adapterServiceUrl+"/getRunningflag", null, String.class);
-                if ("1".equals(flag)){
-                    logFile.setStatus("1");//回放结束
-                }*/
                 List<CanalHeart> list = CanalHeart.find.query().where().eq("fileName", binLogFile.getName()).
-                        orderBy().desc("lastRunTime").findList();
+                        findList();//orderBy().desc("lastRunTime").
                 if (list!=null&&list.size()>0){
                     CanalHeart canalHeart = list.get(0);
-                    /*int c=(int)(System.currentTimeMillis()-canalHeart.getLastRunTime().getTime())/1000;
-                    if (c>2){//两秒没心跳 默认 文件回放结束*/
-                        logFile.setStatus("1");//回放结束
-                        logFile.setEndTime(canalHeart.getLastRunTime());
-                    /*}*/
+                    logFile.setStatus("1");//回放结束
+                    logFile.setEndTime(canalHeart.getLastRunTime());
                 }
-
             }catch (Exception e){
                 e.printStackTrace();
             }
@@ -709,16 +699,12 @@ public class CanalDbsyncController {
 
             mysqlGroup.delete();
         }
-
-
-
         return BaseModel.getInstance("删除集群成功");
     }
 
     @ApiOperation("根据id获取mysql集群详情")
     @GetMapping("/getMysqlGroupDetailById/{id}")
     public BaseModel<MysqlGroup> getMysqlGroupDetailById(@PathVariable  Long id){
-
         MysqlGroup mysqlGroup=MysqlGroup.find.byId(id);
         if (mysqlGroup!=null){
             return BaseModel.getInstance(mysqlGroup);
@@ -729,7 +715,6 @@ public class CanalDbsyncController {
     @ApiOperation("添加mysql集群")
     @PostMapping(value = "/addMysqlGroup")
     public BaseModel<String> addMysqlGroup(@RequestBody MysqlGroup mysqlGroup) throws Exception{
-
         List<MysqlGroup> list=MysqlGroup.find.query().where().eq("name",mysqlGroup.getName()).findList();
         if (list!=null&list.size()>0){
             BaseModel<String> reslut=new BaseModel<>();
@@ -758,7 +743,6 @@ public class CanalDbsyncController {
             canalConfig.setModifiedTime(new Date());
             canalConfig.update("modifiedTime", "content", "contentMd5");
         //}
-
         mysqlGroup.setContent(configString);
         mysqlGroup.save();
         return BaseModel.getInstance("新增mysql集群成功");

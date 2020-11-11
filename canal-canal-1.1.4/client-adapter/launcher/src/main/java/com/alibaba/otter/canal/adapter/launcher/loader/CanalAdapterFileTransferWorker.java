@@ -125,6 +125,8 @@ public class CanalAdapterFileTransferWorker extends  AbstractCanalAdapterWorker{
                             }
                         }catch (EOFException e){
                             fileCanalConnector.insertHeartFile(message.getFileName());
+                            //每一个binlog执行完，删除canal_file_adapter_postion对应的数据
+                            fileCanalConnector.deleteCanalFileAdapterPostion(message.getFileName());
                             //每一个binlog文件回放结束后查看任务最新状态 如果已经停止 则跳到my标识位处
                             String url1= fileCanalConnector.getTask();
                             if (StringUtils.isBlank(url1)){

@@ -367,6 +367,18 @@ public class FileCanalConnector  {
         return result;
     }
 
+    public void deleteCanalFileAdapterPostion(String fileName) {
+
+        String sql="delete from canal_file_adapter_postion where file_name= ? ";
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1,fileName);
+            ps.executeUpdate();
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage(), e);
+        }
+    }
+
 
 
 
